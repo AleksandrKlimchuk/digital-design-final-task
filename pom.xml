@@ -25,6 +25,6 @@
         <module>api</module>
         <module>authentication</module>
         <module>application</module>
-        <module>status</module>
+        <module>common</module>
     </modules>
 </project>

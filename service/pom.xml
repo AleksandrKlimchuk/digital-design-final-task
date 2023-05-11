@@ -32,5 +32,10 @@
             <artifactId>mapper</artifactId>
             <version>${revision}${changelist}</version>
         </dependency>
+        <dependency>
+            <groupId>org.example</groupId>
+            <artifactId>common</artifactId>
+            <version>${revision}${changelist}</version>
+        </dependency>
     </dependencies>
 </project>

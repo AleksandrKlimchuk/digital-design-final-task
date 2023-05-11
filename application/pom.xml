@@ -39,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>org.example</groupId>
-            <artifactId>status</artifactId>
+            <artifactId>common</artifactId>
             <version>${revision}${changelist}</version>
         </dependency>
         <dependency>
