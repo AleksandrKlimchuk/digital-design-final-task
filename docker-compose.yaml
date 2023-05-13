@@ -1,0 +1,4 @@
+version: "3.8"
+services:
+  digital-design-task:
+    image: digital-design-task:1
