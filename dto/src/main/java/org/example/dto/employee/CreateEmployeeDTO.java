@@ -1,7 +1,8 @@
 package org.example.dto.employee;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.Value;
 
 import java.util.UUID;
 
