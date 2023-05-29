@@ -1,0 +1,160 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Alexandr Klimchuk
+      changes:
+        - createTable:
+            tableName: employee
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: patronymic
+                  type: varchar(32)
+              - column:
+                  name: account
+                  type: uuid
+                  constraints:
+                    unique: true
+              - column:
+                  name: email
+                  type: varchar(256)
+              - column:
+                  name: status
+                  type: tinyint
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: project
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(64)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: clob
+              - column:
+                  name: status
+                  type: tinyint
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: project_team
+            columns:
+              - column:
+                  name: employee_id
+                  type: bigint
+                  constraints:
+                    references: employee(id)
+                    nullable: false
+              - column:
+                  name: project_id
+                  type: bigint
+                  constraints:
+                    references: employee(id)
+                    nullable: false
+              - column:
+                  name: role
+                  type: tinyint
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: project_team
+            columnNames: employee_id, project_id
+        - createTable:
+            tableName: task
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: clob
+              - column:
+                  name: executor_id
+                  type: bigint
+                  constraints:
+                    references: employee(id)
+              - column:
+                  name: project_id
+                  type: bigint
+                  constraints:
+                    references: project(id)
+                    nullable: false
+              - column:
+                  name: workload
+                  type: tinyint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deadline
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: tinyint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: author_id
+                  type: bigint
+                  constraints:
+                    references: employee(id)
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+        - addCheckConstraint:
+            tableName: task
+            constraintBody: created_at + make_interval(hours := workload) < deadline
+
+
+
+
