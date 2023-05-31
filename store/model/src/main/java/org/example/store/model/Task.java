@@ -1,40 +1,50 @@
 package org.example.store.model;
 
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
-import lombok.With;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.example.status.TaskStatus;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 
-@Value
-@Builder(toBuilder = true)
-public class Task implements Serializable, Id<Task> {
+@Entity
+@Table(name = "task")
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Task implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -7118883711132880105L;
 
-    @With
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @NonNull
+    @Column(nullable = false)
     String title;
     String description;
-    Long executorId;
-    @NonNull
-    Long projectId;
-    @NonNull
+    @ManyToOne
+    @JoinColumn(name = "executor_id")
+    Employee executor;
+    @ManyToOne
+    @JoinColumn(name = "project_id", nullable = false)
+    Project project;
+    @Column(nullable = false)
     Long workload;
-    @NonNull
+    @Column(nullable = false)
     Instant deadline;
-    @NonNull
+    @Column(nullable = false)
     TaskStatus status;
-    @NonNull
-    Long authorId;
-    @NonNull
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    Employee author;
+    @Column(nullable = false)
     Instant createdAt;
-    @NonNull
+    @Column(nullable = false)
     Instant updatedAt;
 }

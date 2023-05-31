@@ -1,27 +1,35 @@
 package org.example.store.model;
 
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
-import lombok.With;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.example.status.ProjectTeamRole;
 
 import java.io.Serial;
 import java.io.Serializable;
 
-@Value
-@Builder(toBuilder = true)
-public class ProjectTeam implements Serializable, Id<ProjectTeam> {
+@Entity
+@Table(name = "project_team")
+@IdClass(ProjectTeamId.class)
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class ProjectTeam implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -5087240905866944607L;
 
-    @With
-    Long id;
-    @NonNull
-    Long projectId;
-    @NonNull
-    Long employeeId;
-    @NonNull
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    Project project;
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    Employee employee;
+    @Column(nullable = false)
     ProjectTeamRole role;
 }
