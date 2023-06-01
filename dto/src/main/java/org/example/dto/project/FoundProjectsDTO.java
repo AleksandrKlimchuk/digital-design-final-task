@@ -1,13 +1,12 @@
 package org.example.dto.project;
 
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
+import lombok.*;
 import org.example.status.ProjectStatus;
 
 import java.util.List;
 
 @Value
+@RequiredArgsConstructor(access = AccessLevel.PUBLIC)
 @Builder
 public class FoundProjectsDTO {
 
@@ -27,5 +26,5 @@ public class FoundProjectsDTO {
     }
 
     @NonNull
-    List<FoundProjectsDTO> foundProjects;
+    List<FoundProjectsDTO.FoundProjectDTO> foundProjects;
 }

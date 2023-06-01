@@ -12,19 +12,18 @@ import java.util.Objects;
 @Component
 public class CreateProjectMapper implements Mapper<Project, CreateProjectDTO, CreatedProjectDTO> {
 
-
     @Override
-    public Project mapToEntity(@NonNull CreateProjectDTO createProjectDTO) {
+    public Project mapToEntity(@NonNull CreateProjectDTO dto) {
         return Project.builder()
-                .code(createProjectDTO.getCode())
-                .title(createProjectDTO.getTitle())
-                .description(createProjectDTO.getDescription())
+                .code(dto.getCode())
+                .title(dto.getTitle())
+                .description(dto.getDescription())
                 .build();
     }
 
     @Override
     public CreatedProjectDTO mapToResult(@NonNull Project entity) {
-        Objects.requireNonNull(entity.getId(), "Can not map project to result with specified id");
+        Objects.requireNonNull(entity.getId(), "Can not map project to result with unspecified id");
         return new CreatedProjectDTO(entity.getId());
     }
 }
