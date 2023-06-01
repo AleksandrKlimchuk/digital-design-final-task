@@ -38,5 +38,5 @@ public class FoundTasksDTO {
     }
 
     @NonNull
-    List<FoundTasksDTO> foundTasks;
+    List<FoundTaskDTO> foundTasks;
 }
