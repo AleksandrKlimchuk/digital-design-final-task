@@ -1,22 +1,23 @@
 package org.example.service;
 
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Predicate;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.dto.task.*;
+import org.example.exception.AuthorNotExistsException;
+import org.example.exception.EarlyDeadlineException;
+import org.example.exception.EntityNotExistsException;
 import org.example.mapper.task.CreateTaskMapper;
 import org.example.mapper.task.FindTasksMapper;
+import org.example.service.specification.FindTaskSpecification;
 import org.example.service.utils.ServiceUtils;
-import org.example.status.ProjectStatus;
 import org.example.status.TaskStatus;
 import org.example.store.model.Employee;
 import org.example.store.model.ProjectTeam;
 import org.example.store.model.Task;
 import org.example.store.repository.TaskRepository;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -37,11 +38,13 @@ public class TaskService {
     CreateTaskMapper createTaskMapper;
     FindTasksMapper findTasksMapper;
 
+    ObjectProvider<FindTaskSpecification> findTaskSpecificationProvider;
+
     public CreatedTaskDTO createTask(@NonNull CreateTaskDTO taskData) {
-        final ProjectTeam authorEmployeeInProject = projectTeamService.getEmployeeInProject(
+        final ProjectTeam authorEmployeeInProject = fetchAuthorOfProject(
                 taskData.getAuthorId(), taskData.getProjectId()
         );
-        final Employee executorEmployee = fetchExecutorWhichActiveMemberOfProject(
+        final Employee executorEmployee = fetchEmployeeWhichActiveMemberOfProject(
                 taskData.getExecutorId(), taskData.getProjectId()
         );
         final Task task = createTaskMapper.mapToEntity(taskData);
@@ -58,20 +61,20 @@ public class TaskService {
 
     public void updateTask(@NonNull UpdateTaskDTO taskData) {
         final Task storedTask = ServiceUtils.fetchEntityByIdOrThrow(
-                repository::findById, taskData::getId, () -> new IllegalArgumentException(
+                repository::findById, taskData::getId, () -> new EntityNotExistsException(
                         "Task with id %d doesn't exist and so can't be updated".formatted(taskData.getId())
                 )
         );
         storedTask.setWorkload(taskData.getWorkload());
         storedTask.setDeadline(taskData.getDeadline());
         checkDeadline(storedTask);
-        final Employee executor = fetchExecutorWhichActiveMemberOfProject(
+        final Employee executor = fetchEmployeeWhichActiveMemberOfProject(
                 taskData.getExecutorId(), storedTask.getProject().getId()
         );
         storedTask.setExecutor(executor);
-        final Employee author = fetchExecutorWhichActiveMemberOfProject(
+        final Employee author = fetchAuthorOfProject(
                 taskData.getAuthorId(), storedTask.getProject().getId()
-        );
+        ).getEmployee();
         storedTask.setAuthor(author);
         storedTask.setTitle(taskData.getTitle());
         storedTask.setDescription(taskData.getDescription());
@@ -81,7 +84,7 @@ public class TaskService {
 
     public FoundTasksDTO findTasksByFilter(@NonNull FindTasksDTO filter) {
         final List<FoundTasksDTO.FoundTaskDTO> foundTasks = repository.
-                findAll(getFilterSpecification(filter))
+                findAll(findTaskSpecificationProvider.getObject(filter))
                 .stream()
                 .map(findTasksMapper::mapToResult)
                 .toList();
@@ -90,7 +93,7 @@ public class TaskService {
 
     public ChangedTaskStatusDTO advanceTask(@NonNull ChangeTaskStatusDTO taskData) {
         final Task storedTask = ServiceUtils.fetchEntityByIdOrThrow(
-                repository::findById, taskData::getId, () -> new IllegalArgumentException(
+                repository::findById, taskData::getId, () -> new EntityNotExistsException(
                         "Task with id %d doesn't exist and so can't be advanced".formatted(taskData.getId())
                 )
         );
@@ -102,58 +105,28 @@ public class TaskService {
 
     private void checkDeadline(Task task) {
         if (task.getCreatedAt().plus(task.getWorkload(), ChronoUnit.HOURS).isAfter(task.getDeadline())) {
-            throw new IllegalArgumentException(
+            throw new EarlyDeadlineException(
                     "Created time %s plus workload %s hours should be less than deadline %s"
                             .formatted(task.getCreatedAt(), task.getWorkload(), task.getDeadline())
             );
         }
     }
 
-    private Employee fetchExecutorWhichActiveMemberOfProject(Long executorId, @NonNull Long projectId) {
+    private ProjectTeam fetchAuthorOfProject(Long authorId, Long projectId) {
+        return projectTeamService
+                .getEmployeeInProject(authorId, projectId)
+                .orElseThrow(() -> new AuthorNotExistsException(
+                        "Employee with id %d isn't member of project with id %s team and so can't be author"
+                                .formatted(authorId, projectId)
+                ));
+    }
+
+    private Employee fetchEmployeeWhichActiveMemberOfProject(Long executorId, @NonNull Long projectId) {
         if (Objects.isNull(executorId)) {
             return null;
         }
         final Employee executorEmployee = employeeService.getEmployeeEntityById(executorId);
         projectTeamService.getEmployeeInProject(executorId, projectId);
         return executorEmployee;
-    }
-
-    private Specification<Task> getFilterSpecification(FindTasksDTO filter) {
-        return (root, query, criteriaBuilder) -> {
-            final String textFilter = "%" + filter.getTitle() + "%";
-            Predicate finalPredicate = criteriaBuilder.like(root.get("title"), textFilter);
-            if (!Objects.isNull(filter.getStatuses()) && !filter.getStatuses().isEmpty()) {
-                final Expression<ProjectStatus> statusExpression = root.get("status");
-                final Predicate status = statusExpression.in(filter.getStatuses());
-                finalPredicate = criteriaBuilder.and(finalPredicate, status);
-            }
-            if (!Objects.isNull(filter.getExecutorId())) {
-                final Predicate executor = criteriaBuilder.equal(
-                        root.get("executor").get("id"), filter.getExecutorId()
-                );
-                finalPredicate = criteriaBuilder.and(finalPredicate, executor);
-            }
-            if (!Objects.isNull(filter.getAuthorId())) {
-                final Predicate author = criteriaBuilder.equal(
-                        root.get("author").get("id"), filter.getAuthorId()
-                );
-                finalPredicate = criteriaBuilder.and(finalPredicate, author);
-            }
-            if (!Objects.isNull(filter.getDeadline())) {
-                final Predicate deadline = criteriaBuilder.lessThanOrEqualTo(
-                        root.get("deadline"), filter.getDeadline()
-                );
-                finalPredicate = criteriaBuilder.and(finalPredicate, deadline);
-            }
-            if (!Objects.isNull(filter.getCreatedAt())) {
-                final Predicate createdAt = criteriaBuilder.greaterThanOrEqualTo(
-                        root.get("createdAt"), filter.getCreatedAt()
-                );
-                finalPredicate = criteriaBuilder.and(finalPredicate, createdAt);
-            }
-            return query
-                    .where(finalPredicate)
-                    .getRestriction();
-        };
     }
 }

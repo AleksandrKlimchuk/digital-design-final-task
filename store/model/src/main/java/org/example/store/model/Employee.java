@@ -1,14 +1,12 @@
 package org.example.store.model;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.example.status.EmployeeStatus;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.UUID;
 
 @Entity
 @Table(name = "employee")
@@ -32,8 +30,7 @@ public class Employee implements Serializable {
     @Column(name = "first_name", nullable = false)
     String firstName;
     String patronymic;
-    @Column(unique = true)
-    UUID account;
+    String account;
     String email;
     @Column(nullable = false)
     EmployeeStatus status;

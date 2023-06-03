@@ -1,7 +1,14 @@
 package org.example.application;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+@SpringBootApplication
+@ComponentScan("org.example.service")
 public class Main {
+
     public static void main(String[] args) {
-        System.out.println("Application started");
+        SpringApplication.run(Main.class, args);
     }
 }

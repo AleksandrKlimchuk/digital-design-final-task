@@ -5,8 +5,6 @@ import lombok.NonNull;
 import lombok.Value;
 import org.example.status.EmployeeStatus;
 
-import java.util.UUID;
-
 @Value
 @Builder
 public class FoundEmployeeDTO {
@@ -18,7 +16,7 @@ public class FoundEmployeeDTO {
     @NonNull
     String firstName;
     String patronymic;
-    UUID account;
+    String account;
     String email;
     EmployeeStatus status;
 }

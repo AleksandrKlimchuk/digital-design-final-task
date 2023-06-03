@@ -2,6 +2,7 @@ package org.example.dto.project_team;
 
 import lombok.NonNull;
 import lombok.Value;
+import org.example.dto.employee.FoundEmployeeDTO;
 import org.example.status.ProjectTeamRole;
 
 import java.util.List;
@@ -10,13 +11,13 @@ import java.util.List;
 public class FoundAllEmployeesDTO {
 
     @Value
-    public static class FoundEmployeeDTO {
+    public static class FoundProjectTeamEmployee {
         @NonNull
-        Long employeeId;
+        FoundEmployeeDTO employee;
         @NonNull
         ProjectTeamRole role;
     }
 
     @NonNull
-    List<FoundEmployeeDTO> foundEmployeeIds;
+    List<FoundProjectTeamEmployee> foundEmployeeIds;
 }

@@ -161,6 +161,7 @@ databaseChangeLog:
         - dropUniqueConstraint:
             tableName: employee
             uniqueColumns: account
-
-
-
+        - modifyDataType:
+            tableName: employee
+            columnName: account
+            newDataType: varchar(32)

@@ -3,6 +3,8 @@ package org.example.dto.task;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
+import org.example.dto.employee.FoundEmployeeDTO;
+import org.example.dto.project.FoundProjectDTO;
 import org.example.status.TaskStatus;
 
 import java.time.Instant;
@@ -20,9 +22,9 @@ public class FoundTasksDTO {
         @NonNull
         String title;
         String description;
-        Long executorId;
+        FoundEmployeeDTO executor;
         @NonNull
-        Long projectId;
+        FoundProjectDTO project;
         @NonNull
         Long workload;
         @NonNull
@@ -30,7 +32,7 @@ public class FoundTasksDTO {
         @NonNull
         TaskStatus status;
         @NonNull
-        Long authorId;
+        FoundEmployeeDTO author;
         @NonNull
         Instant createdAt;
         @NonNull

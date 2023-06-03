@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS employee(
     first_name  VARCHAR(32)     NOT NULL,
     last_name   VARCHAR(32)     NOT NULL,
     patronymic  VARCHAR(32),
-    account     UUID,
+    account     VARCHAR(32),
     email       VARCHAR(256),
     status      SMALLINT        NOT NULL
 );
