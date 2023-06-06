@@ -7,5 +7,5 @@ import lombok.Value;
 public class FindEmployeesDTO {
 
     @NonNull
-    String filter;
+    String data;
 }

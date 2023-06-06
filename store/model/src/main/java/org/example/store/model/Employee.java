@@ -1,31 +1,37 @@
 package org.example.store.model;
 
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Value;
-import lombok.With;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.example.status.EmployeeStatus;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.UUID;
 
-@Value
-@Builder(toBuilder = true)
-public class Employee implements Serializable, Id<Employee> {
+@Entity
+@Table(name = "employee")
+@Getter
+@Setter
+@ToString
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Employee implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 8928580366687397378L;
 
-    @With
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @NonNull
+    @Column(name = "last_name", nullable = false)
     String lastName;
-    @NonNull
+    @Column(name = "first_name", nullable = false)
     String firstName;
     String patronymic;
-    UUID account;
+    String account;
     String email;
-    @NonNull
+    @Column(nullable = false)
     EmployeeStatus status;
 }

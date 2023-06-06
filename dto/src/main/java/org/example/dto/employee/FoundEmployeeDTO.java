@@ -3,8 +3,7 @@ package org.example.dto.employee;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
-
-import java.util.UUID;
+import org.example.status.EmployeeStatus;
 
 @Value
 @Builder
@@ -17,6 +16,7 @@ public class FoundEmployeeDTO {
     @NonNull
     String firstName;
     String patronymic;
-    UUID account;
+    String account;
     String email;
+    EmployeeStatus status;
 }
