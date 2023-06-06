@@ -17,8 +17,6 @@ public class UpdateTaskDTO {
     String description;
     Long executorId;
     @NonNull
-    Long projectId;
-    @NonNull
     Long workload;
     @NonNull
     Instant deadline;

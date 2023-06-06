@@ -4,8 +4,6 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import java.util.UUID;
-
 @Value
 @Builder
 public class UpdateEmployeeDTO {
@@ -17,6 +15,6 @@ public class UpdateEmployeeDTO {
     @NonNull
     String firstName;
     String patronymic;
-    UUID account;
+    String account;
     String email;
 }

@@ -154,7 +154,14 @@ databaseChangeLog:
         - addCheckConstraint:
             tableName: task
             constraintBody: created_at + make_interval(hours := workload) < deadline
-
-
-
-
+  - changeSet:
+      id: 2
+      author: Alexandr Klimchuk
+      changes:
+        - dropUniqueConstraint:
+            tableName: employee
+            uniqueColumns: account
+        - modifyDataType:
+            tableName: employee
+            columnName: account
+            newDataType: varchar(32)
