@@ -31,6 +31,7 @@ databaseChangeLog:
                   type: uuid
                   constraints:
                     unique: true
+                    uniqueConstraintName: employee_unique_constraint
               - column:
                   name: email
                   type: varchar(256)
@@ -76,12 +77,14 @@ databaseChangeLog:
                   type: bigint
                   constraints:
                     references: employee(id)
+                    foreignKeyName: fk_employee_id
                     nullable: false
               - column:
                   name: project_id
                   type: bigint
                   constraints:
-                    references: employee(id)
+                    references: project(id)
+                    foreignKeyName: fk_project_id
                     nullable: false
               - column:
                   name: role
@@ -114,11 +117,13 @@ databaseChangeLog:
                   type: bigint
                   constraints:
                     references: employee(id)
+                    foreignKeyName: fk_executor_employee_id
               - column:
                   name: project_id
                   type: bigint
                   constraints:
                     references: project(id)
+                    foreignKeyName: fk_project_id
                     nullable: false
               - column:
                   name: workload
@@ -140,9 +145,10 @@ databaseChangeLog:
                   type: bigint
                   constraints:
                     references: employee(id)
+                    foreignKeyName: fk_author_employee_id
                     nullable: false
               - column:
-                  name: updated_at
+                  name: created_at
                   type: datetime
                   constraints:
                     nullable: false
@@ -151,14 +157,12 @@ databaseChangeLog:
                   type: datetime
                   constraints:
                     nullable: false
-        - addCheckConstraint:
-            tableName: task
-            constraintBody: created_at + make_interval(hours := workload) < deadline
   - changeSet:
       id: 2
       author: Alexandr Klimchuk
       changes:
         - dropUniqueConstraint:
+            constraintName: employee_unique_constraint
             tableName: employee
             uniqueColumns: account
         - modifyDataType:

@@ -33,7 +33,7 @@ public class FindEmployeeSpecification implements Specification<Employee> {
     public Predicate toPredicate(
             @NonNull Root<Employee> root, @NonNull CriteriaQuery<?> query, @NonNull CriteriaBuilder criteriaBuilder
     ) {
-        final String filterData = SpecificationUtils.createPatternFromText(filter.getData());
+        final String filterData = SpecificationUtils.createPatternFromText(filter.getFilter());
         final List<Predicate> textPredicates = List.of(
                 SpecificationUtils.ilike(root.get("firstName"), filterData, criteriaBuilder),
                 SpecificationUtils.ilike(root.get("lastName"), filterData, criteriaBuilder),

@@ -71,7 +71,7 @@ public class EmployeeService {
         repository.save(storedEmployee);
     }
 
-    public FoundEmployeesDTO findEmployeesByFilter(@NonNull FindEmployeesDTO filter) {
+    public FoundEmployeesDTO findEmployeesByFilter(FindEmployeesDTO filter) {
         final List<FoundEmployeeDTO> foundEmployees = repository
                 .findAll(findEmployeeSpecificationProvider.getObject(filter))
                 .stream()
@@ -80,10 +80,19 @@ public class EmployeeService {
         return new FoundEmployeesDTO(foundEmployees);
     }
 
-    public Optional<FoundEmployeeDTO> findEmployee(@NonNull FindEmployeeDTO identifier) {
-        return Objects.isNull(identifier.getAccount())
-                ? findEmployeeById(identifier)
-                : findEmployeeByAccount(identifier);
+    public FoundEmployeeDTO findEmployee(@NonNull FindEmployeeDTO identifier) {
+        if (Objects.isNull(identifier.getAccount())) {
+            return findEmployeeById(identifier).orElseThrow(
+                    () -> new EmployeeNotExistsException(
+                            "Employee profile with id %d doesn't exists".formatted(identifier.getId())
+                    )
+            );
+        }
+        return findEmployeeByAccount(identifier).orElseThrow(
+                () -> new EmployeeNotExistsException(
+                        "Employee profile with account %s doesn't exists".formatted(identifier.getAccount())
+                )
+        );
     }
 
     Employee getEmployeeEntityById(@NonNull Long id) {
@@ -99,6 +108,12 @@ public class EmployeeService {
         return employee;
     }
 
+    Employee getEmployeeByAccount(@NonNull String account) {
+        return repository.findByAccount(account).orElseThrow(
+                () -> new EmployeeNotExistsException("Employee with account %s doesn't exists".formatted(account))
+        );
+    }
+
     private void checkAccountIsUniqueBetweenActives(String account) {
         checkAccountIsUniqueBetweenActives(account, null);
     }
@@ -106,8 +121,7 @@ public class EmployeeService {
     private void checkAccountIsUniqueBetweenActives(String account, Long currentEmployeeId) {
         ServiceUtils.checkValueIsUniqueWithPredicateOrThrow(
                 repository::findByAccount, () -> account,
-                foundEmployee -> foundEmployee.getStatus().equals(EmployeeStatus.ACTIVE)
-                        && !foundEmployee.getId().equals(currentEmployeeId),
+                foundEmployee -> !foundEmployee.getId().equals(currentEmployeeId),
                 () -> new EntityAlreadyExistsException(
                         "Active employee with account %s already exists".formatted(account)
                 )

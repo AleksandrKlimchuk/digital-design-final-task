@@ -19,6 +19,10 @@ services:
 
   digital-design-task:
     image: digital-design-task:1
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
     networks:
       - java-digital-design
 
