@@ -8,7 +8,7 @@ import java.time.Instant;
 
 @Value
 @Builder
-public class UpdateTaskDTO {
+public class UpdatedTaskDTO {
 
     @NonNull
     Long id;
@@ -17,9 +17,13 @@ public class UpdateTaskDTO {
     String description;
     Long executorId;
     @NonNull
+    Long projectId;
+    @NonNull
     Long workload;
     @NonNull
     Instant deadline;
     @NonNull
     Long authorId;
+    @NonNull
+    Instant updatedAt;
 }

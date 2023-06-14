@@ -1,10 +1,10 @@
-package org.example.dto.project;
+package org.example.dto.employee;
 
 import lombok.NonNull;
 import lombok.Value;
 
 @Value
-public class CreatedProjectDTO {
+public class DeleteEmployeeDTO {
 
     @NonNull
     Long id;

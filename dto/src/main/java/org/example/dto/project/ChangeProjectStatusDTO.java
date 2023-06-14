@@ -4,7 +4,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 @Value
-public class CreatedProjectDTO {
+public class ChangeProjectStatusDTO {
 
     @NonNull
     Long id;
