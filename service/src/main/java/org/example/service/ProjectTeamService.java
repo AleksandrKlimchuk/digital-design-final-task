@@ -65,8 +65,10 @@ public class ProjectTeamService {
     }
 
     public FoundAllEmployeesDTO getAllEmployeesOfProject(@NonNull FindAllEmployeesDTO projectData) {
+        final Long projectId = projectData.getProjectId();
+        projectService.findProjectEntityById(projectId);
         final List<FoundAllEmployeesDTO.FoundProjectTeamEmployee> allEmployeesOfProject = repository
-                .findAllByProject_Id(projectData.getProjectId())
+                .findAllByProject_Id(projectId)
                 .stream()
                 .map(findAllEmployeeMapper::mapToResult)
                 .toList();
@@ -74,7 +76,6 @@ public class ProjectTeamService {
     }
 
     Optional<ProjectTeam> getEmployeeInProject(@NonNull Long employeeId, @NonNull Long projectId) {
-        return repository
-                .findByEmployee_IdAndProject_Id(employeeId, projectId);
+        return repository.findByEmployee_IdAndProject_Id(employeeId, projectId);
     }
 }

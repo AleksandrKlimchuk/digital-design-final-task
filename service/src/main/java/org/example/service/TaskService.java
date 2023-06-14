@@ -20,6 +20,7 @@ import org.example.store.repository.TaskRepository;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -40,9 +41,10 @@ public class TaskService {
 
     ObjectProvider<FindTaskSpecification> findTaskSpecificationProvider;
 
-    public CreatedTaskDTO createTask(@NonNull CreateTaskDTO taskData) {
+    public CreatedTaskDTO createTask(@NonNull Principal credentials, @NonNull CreateTaskDTO taskData) {
+        final Employee authorProfile = employeeService.getEmployeeEntityByAccount(credentials.getName());
         final ProjectTeam authorEmployeeInProject = fetchAuthorOfProject(
-                taskData.getAuthorId(), taskData.getProjectId()
+                authorProfile.getId(), taskData.getProjectId()
         );
         final Employee executorEmployee = fetchEmployeeWhichActiveMemberOfProject(
                 taskData.getExecutorId(), taskData.getProjectId()
@@ -59,7 +61,8 @@ public class TaskService {
         return createTaskMapper.mapToResult(savedTask);
     }
 
-    public void updateTask(@NonNull UpdateTaskDTO taskData) {
+    public void updateTask(@NonNull Principal credentials, @NonNull UpdateTaskDTO taskData) {
+        final Employee authorProfile = employeeService.getEmployeeEntityByAccount(credentials.getName());
         final Task storedTask = ServiceUtils.fetchEntityByIdOrThrow(
                 repository::findById, taskData::getId, () -> new EntityNotExistsException(
                         "Task with id %d doesn't exist and so can't be updated".formatted(taskData.getId())
@@ -73,7 +76,7 @@ public class TaskService {
         );
         storedTask.setExecutor(executor);
         final Employee author = fetchAuthorOfProject(
-                taskData.getAuthorId(), storedTask.getProject().getId()
+                authorProfile.getId(), storedTask.getProject().getId()
         ).getEmployee();
         storedTask.setAuthor(author);
         storedTask.setTitle(taskData.getTitle());
@@ -91,10 +94,10 @@ public class TaskService {
         return new FoundTasksDTO(foundTasks);
     }
 
-    public ChangedTaskStatusDTO advanceTask(@NonNull ChangeTaskStatusDTO taskData) {
+    public ChangedTaskStatusDTO advanceTask(@NonNull Long taskId) {
         final Task storedTask = ServiceUtils.fetchEntityByIdOrThrow(
-                repository::findById, taskData::getId, () -> new EntityNotExistsException(
-                        "Task with id %d doesn't exist and so can't be advanced".formatted(taskData.getId())
+                repository::findById, () -> taskId, () -> new EntityNotExistsException(
+                        "Task with id %d doesn't exist and so can't be advanced".formatted(taskId)
                 )
         );
         final TaskStatus advancedStatus = TaskStatus.nextTaskStatus(storedTask.getStatus());
