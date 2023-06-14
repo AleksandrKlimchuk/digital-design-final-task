@@ -20,7 +20,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -61,17 +60,17 @@ public class EmployeeService {
         repository.save(updatedEmployee);
     }
 
-    public void deleteEmployeeProfile(@NonNull DeleteEmployeeDTO employeeData) {
+    public void deleteEmployeeProfile(@NonNull Long employeeId) {
         final Employee storedEmployee = ServiceUtils.fetchEntityByIdOrThrow(
-                repository::findById, employeeData::getId, () -> new EmployeeNotExistsException(
-                        "Employee with id %d doesn't exist and so can't be deleted".formatted(employeeData.getId())
+                repository::findById, () -> employeeId, () -> new EmployeeNotExistsException(
+                        "Employee with id %d doesn't exist and so can't be deleted".formatted(employeeId)
                 )
         );
         storedEmployee.setStatus(EmployeeStatus.DELETED);
         repository.save(storedEmployee);
     }
 
-    public FoundEmployeesDTO findEmployeesByFilter(@NonNull FindEmployeesDTO filter) {
+    public FoundEmployeesDTO findEmployeesByFilter(FindEmployeesDTO filter) {
         final List<FoundEmployeeDTO> foundEmployees = repository
                 .findAll(findEmployeeSpecificationProvider.getObject(filter))
                 .stream()
@@ -80,23 +79,39 @@ public class EmployeeService {
         return new FoundEmployeesDTO(foundEmployees);
     }
 
-    public Optional<FoundEmployeeDTO> findEmployee(@NonNull FindEmployeeDTO identifier) {
-        return Objects.isNull(identifier.getAccount())
-                ? findEmployeeById(identifier)
-                : findEmployeeByAccount(identifier);
+    public FoundEmployeeDTO findEmployeeById(@NonNull Long employeeId) {
+        return findEmployeeByIdentifier(
+                repository::findById, employeeId, () -> new EmployeeNotExistsException(
+                        "Employee with id %d doesn't exists".formatted(employeeId)
+                )
+        );
     }
 
-    Employee getEmployeeEntityById(@NonNull Long id) {
+    public FoundEmployeeDTO findEmployeeByAccount(@NonNull String account) {
+        return findEmployeeByIdentifier(
+                repository::findByAccount, account, () -> new EmployeeNotExistsException(
+                        "Employee profile with account %s doesn't exists".formatted(account)
+                )
+        );
+    }
+
+    Employee getEmployeeEntityById(@NonNull Long employeeId) {
         final Employee employee = ServiceUtils.fetchEntityByIdOrThrow(
-                repository::findById, () -> id,
+                repository::findById, () -> employeeId,
                 () -> new EmployeeNotExistsException(
-                        "Employee with id %d doesn't exists".formatted(id)
+                        "Employee with id %d doesn't exists".formatted(employeeId)
                 )
         );
         if (employee.getStatus().equals(EmployeeStatus.DELETED)) {
-            throw new EmployeeDeletedException("Employee with id %d was deleted before".formatted(id));
+            throw new EmployeeDeletedException("Employee with id %d was deleted before".formatted(employeeId));
         }
         return employee;
+    }
+
+    Employee getEmployeeEntityByAccount(@NonNull String account) {
+        return repository.findByAccount(account).orElseThrow(
+                () -> new EmployeeNotExistsException("Employee with account %s doesn't exists".formatted(account))
+        );
     }
 
     private void checkAccountIsUniqueBetweenActives(String account) {
@@ -106,27 +121,19 @@ public class EmployeeService {
     private void checkAccountIsUniqueBetweenActives(String account, Long currentEmployeeId) {
         ServiceUtils.checkValueIsUniqueWithPredicateOrThrow(
                 repository::findByAccount, () -> account,
-                foundEmployee -> foundEmployee.getStatus().equals(EmployeeStatus.ACTIVE)
-                        && !foundEmployee.getId().equals(currentEmployeeId),
+                foundEmployee -> !foundEmployee.getId().equals(currentEmployeeId),
                 () -> new EntityAlreadyExistsException(
                         "Active employee with account %s already exists".formatted(account)
                 )
         );
     }
 
-    private Optional<FoundEmployeeDTO> findEmployeeById(@NonNull FindEmployeeDTO identifier) {
-        return findEmployeeByIdentifier(repository::findById, identifier::getId);
-    }
-
-    private Optional<FoundEmployeeDTO> findEmployeeByAccount(@NonNull FindEmployeeDTO identifier) {
-        return findEmployeeByIdentifier(repository::findByAccount, identifier::getAccount);
-    }
-
-    private <IdentifierType> Optional<FoundEmployeeDTO> findEmployeeByIdentifier(
+    private <IdentifierType> FoundEmployeeDTO findEmployeeByIdentifier(
             @NonNull Function<? super IdentifierType, Optional<? extends Employee>> extractor,
-            @NonNull Supplier<IdentifierType> extractorParamSupplier
+            @NonNull IdentifierType extractorParam,
+            @NonNull Supplier<? extends RuntimeException> exceptionSupplier
     ) {
-        Optional<? extends Employee> foundEmployee = extractor.apply(extractorParamSupplier.get());
-        return foundEmployee.map(findEmployeesMapper::mapToResult);
+        Employee foundEmployee = extractor.apply(extractorParam).orElseThrow(exceptionSupplier);
+        return findEmployeesMapper.mapToResult(foundEmployee);
     }
 }
