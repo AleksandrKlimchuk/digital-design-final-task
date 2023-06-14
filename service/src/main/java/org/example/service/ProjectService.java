@@ -74,7 +74,7 @@ public class ProjectService {
         return new ChangedProjectStatusDTO(advancedStatus);
     }
 
-    Project findProjectEntityById(@NonNull Long id) {
+    Project getProjectEntityById(@NonNull Long id) {
         return ServiceUtils.fetchEntityByIdOrThrow(
                 repository::findById, () -> id,
                 () -> new ProjectNotExistsException(
