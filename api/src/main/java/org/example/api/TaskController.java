@@ -11,11 +11,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.example.mapping.Mappings;
 import org.example.api.utils.swagger.TaskSwaggerDescriptions;
 import org.example.dto.ErrorDTO;
 import org.example.dto.project.ChangedProjectStatusDTO;
 import org.example.dto.task.*;
+import org.example.mapping.Mappings;
 import org.example.service.TaskService;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
@@ -137,6 +137,6 @@ public class TaskController {
     public ChangedTaskStatusDTO advanceTask(
             @PathVariable @Parameter(description = "Уникальный идентификатор задачи") Long id
     ) {
-        return service.advanceTask(new ChangeTaskStatusDTO(id));
+        return service.advanceTask(id);
     }
 }

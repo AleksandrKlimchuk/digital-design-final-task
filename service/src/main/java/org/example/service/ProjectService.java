@@ -62,10 +62,10 @@ public class ProjectService {
         return new FoundProjectsDTO(foundProjects);
     }
 
-    public ChangedProjectStatusDTO advanceProject(@NonNull ChangeProjectStatusDTO projectData) {
+    public ChangedProjectStatusDTO advanceProject(@NonNull Long projectId) {
         final Project storedProject = ServiceUtils.fetchEntityByIdOrThrow(
-                repository::findById, projectData::getId, () -> new ProjectNotExistsException(
-                        "Project with id %s doesn't exist and so can't be advanced".formatted(projectData.getId())
+                repository::findById, () -> projectId, () -> new ProjectNotExistsException(
+                        "Project with id %s doesn't exist and so can't be advanced".formatted(projectId)
                 )
         );
         final ProjectStatus advancedStatus = ProjectStatus.nextProjectStatus(storedProject.getStatus());

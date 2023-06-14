@@ -12,10 +12,10 @@ import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.example.mapping.Mappings;
 import org.example.api.utils.swagger.EmployeeSwaggerDescriptions;
 import org.example.dto.ErrorDTO;
 import org.example.dto.employee.*;
+import org.example.mapping.Mappings;
 import org.example.service.EmployeeService;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
@@ -117,7 +117,7 @@ public class EmployeeController {
     public void deleteEmployeeProfile(
             @NonNull @PathVariable @Parameter(description = "Уникальный идентификатор") Long id
     ) {
-        service.deleteEmployeeProfile(new DeleteEmployeeDTO(id));
+        service.deleteEmployeeProfile(id);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -162,7 +162,7 @@ public class EmployeeController {
     public FoundEmployeeDTO findEmployeeById(
             @PathVariable @Parameter(description = "Уникальный идентификатор") Long id
     ) {
-        return findEmployee(FindEmployeeDTO.ofId(id));
+        return service.findEmployeeById(id);
     }
 
     @GetMapping(value = Mappings.EMPLOYEE_ACCOUNT_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -190,10 +190,6 @@ public class EmployeeController {
     public FoundEmployeeDTO findEmployeeByAccount(
             @RequestParam @Parameter(description = "Учетная запись") String account
     ) {
-        return findEmployee(FindEmployeeDTO.ofAccount(account));
-    }
-
-    private FoundEmployeeDTO findEmployee(FindEmployeeDTO identifier) {
-        return service.findEmployee(identifier);
+        return service.findEmployeeByAccount(account);
     }
 }

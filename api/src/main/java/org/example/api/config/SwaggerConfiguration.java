@@ -13,7 +13,7 @@ import java.util.List;
 
 @Configuration
 @SecurityScheme(type = SecuritySchemeType.HTTP, name = "basicAuth", scheme = "basic")
-public class SwaggerConfig {
+public class SwaggerConfiguration {
 
     @Bean
     public OpenAPI openAPI() {

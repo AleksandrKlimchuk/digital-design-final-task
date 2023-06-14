@@ -42,7 +42,7 @@ public class TaskService {
     ObjectProvider<FindTaskSpecification> findTaskSpecificationProvider;
 
     public CreatedTaskDTO createTask(@NonNull Principal credentials, @NonNull CreateTaskDTO taskData) {
-        final Employee authorProfile = employeeService.getEmployeeByAccount(credentials.getName());
+        final Employee authorProfile = employeeService.getEmployeeEntityByAccount(credentials.getName());
         final ProjectTeam authorEmployeeInProject = fetchAuthorOfProject(
                 authorProfile.getId(), taskData.getProjectId()
         );
@@ -62,7 +62,7 @@ public class TaskService {
     }
 
     public void updateTask(@NonNull Principal credentials, @NonNull UpdateTaskDTO taskData) {
-        final Employee authorProfile = employeeService.getEmployeeByAccount(credentials.getName());
+        final Employee authorProfile = employeeService.getEmployeeEntityByAccount(credentials.getName());
         final Task storedTask = ServiceUtils.fetchEntityByIdOrThrow(
                 repository::findById, taskData::getId, () -> new EntityNotExistsException(
                         "Task with id %d doesn't exist and so can't be updated".formatted(taskData.getId())
@@ -94,10 +94,10 @@ public class TaskService {
         return new FoundTasksDTO(foundTasks);
     }
 
-    public ChangedTaskStatusDTO advanceTask(@NonNull ChangeTaskStatusDTO taskData) {
+    public ChangedTaskStatusDTO advanceTask(@NonNull Long taskId) {
         final Task storedTask = ServiceUtils.fetchEntityByIdOrThrow(
-                repository::findById, taskData::getId, () -> new EntityNotExistsException(
-                        "Task with id %d doesn't exist and so can't be advanced".formatted(taskData.getId())
+                repository::findById, () -> taskId, () -> new EntityNotExistsException(
+                        "Task with id %d doesn't exist and so can't be advanced".formatted(taskId)
                 )
         );
         final TaskStatus advancedStatus = TaskStatus.nextTaskStatus(storedTask.getStatus());

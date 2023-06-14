@@ -128,6 +128,6 @@ public class ProjectController {
     public ChangedProjectStatusDTO advanceProject(
             @PathVariable @Parameter(description = "Уникальный идентификатор проекта") Long id
     ) {
-        return service.advanceProject(new ChangeProjectStatusDTO(id));
+        return service.advanceProject(id);
     }
 }
