@@ -1,12 +1,11 @@
 package org.example.application;
 
-import org.example.api.config.ApiConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@Import({ApiConfig.class})
+@ComponentScan("org.example.service")
 public class Main {
 
     public static void main(String[] args) {

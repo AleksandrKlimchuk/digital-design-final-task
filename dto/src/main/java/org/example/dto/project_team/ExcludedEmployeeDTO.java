@@ -5,10 +5,8 @@ import lombok.Value;
 import org.example.status.ProjectTeamRole;
 
 @Value
-public class AddEmployeeDTO {
+public class ExcludedEmployeeDTO {
 
-    @NonNull
-    Long projectId;
     @NonNull
     Long employeeId;
     @NonNull
