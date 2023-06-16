@@ -1,15 +1,18 @@
 package org.example.service;
 
+import jakarta.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.log4j.Log4j2;
 import org.example.dto.task.*;
 import org.example.exception.AuthorNotExistsException;
 import org.example.exception.EarlyDeadlineException;
 import org.example.exception.EntityNotExistsException;
 import org.example.mapper.task.CreateTaskMapper;
 import org.example.mapper.task.FindTasksMapper;
+import org.example.mapper.task.MailMapper;
 import org.example.service.specification.FindTaskSpecification;
 import org.example.service.utils.ServiceUtils;
 import org.example.status.TaskStatus;
@@ -29,15 +32,18 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Log4j2
 public class TaskService {
 
     TaskRepository repository;
 
     EmployeeService employeeService;
     ProjectTeamService projectTeamService;
+    MailService mailService;
 
     CreateTaskMapper createTaskMapper;
     FindTasksMapper findTasksMapper;
+    MailMapper mailMapper;
 
     ObjectProvider<FindTaskSpecification> findTaskSpecificationProvider;
 
@@ -58,6 +64,7 @@ public class TaskService {
         task.setUpdatedAt(Instant.now());
         checkDeadline(task);
         final Task savedTask = repository.save(task);
+        sendEmailToExecutor(task);
         return createTaskMapper.mapToResult(savedTask);
     }
 
@@ -68,6 +75,7 @@ public class TaskService {
                         "Task with id %d doesn't exist and so can't be updated".formatted(taskData.getId())
                 )
         );
+        final Employee previousExecutor = storedTask.getExecutor();
         storedTask.setWorkload(taskData.getWorkload());
         storedTask.setDeadline(taskData.getDeadline());
         checkDeadline(storedTask);
@@ -83,6 +91,9 @@ public class TaskService {
         storedTask.setDescription(taskData.getDescription());
         storedTask.setUpdatedAt(Instant.now());
         repository.save(storedTask);
+        if (checkShouldSendEmail(previousExecutor, executor)) {
+            sendEmailToExecutor(storedTask);
+        }
     }
 
     public FoundTasksDTO findTasksByFilter(@NonNull FindTasksDTO filter) {
@@ -131,5 +142,28 @@ public class TaskService {
         final Employee executorEmployee = employeeService.getEmployeeEntityById(executorId);
         projectTeamService.getEmployeeInProject(executorId, projectId);
         return executorEmployee;
+    }
+
+    private boolean checkShouldSendEmail(Employee previous, Employee actual) {
+        if (Objects.isNull(actual)) {
+            return false;
+        }
+        if (Objects.isNull(previous)) {
+            return true;
+        }
+        return !previous.getId().equals(actual.getId());
+    }
+
+    private void sendEmailToExecutor(@NonNull Task task) {
+        if (!Objects.isNull(task.getExecutor())) {
+            try {
+                final MailDTO mailData = mailMapper.mapToResult(task);
+                mailService.sendEmail(mailData);
+            } catch (MessagingException e) {
+                log.warn("Message was not sent to executor {}", task.getExecutor());
+            } catch (NullPointerException e) {
+                log.info("Executor email unspecified");
+            }
+        }
     }
 }

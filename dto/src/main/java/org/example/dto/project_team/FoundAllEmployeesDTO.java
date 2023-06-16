@@ -25,5 +25,5 @@ public class FoundAllEmployeesDTO {
 
     @Schema(description = "Список сотрудников проекта")
     @NonNull
-    List<FoundProjectTeamEmployee> foundEmployeeIds;
+    List<FoundProjectTeamEmployee> foundEmployees;
 }

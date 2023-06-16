@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:remove="all">Заголовок</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<div>
+    Сообщение для: <strong th:text="${toMail}">TO UNKNOWN MAIN</strong>
+</div>
+<br/>
+<div>
+    Здравствуйте,
+    <span th:text="${executorLastName}">UNKNOWN LAST NAME</span>
+    <span th:text="${executorFirstName}">UNKNOWN FIRST NAME</span>
+    <span th:if="${executorPatronymic != null}" th:text="${executorPatronymic}">UNKNOWN PATRONYMIC</span>
+</div>
+<br/>
+<div>
+    Вам была назначена задача на исполнение из проекта
+    Код <strong th:text="${projectCode}">UNKNOWN PROJECT CODE</strong>
+    Название <i th:text="${projectTitle}">UNKNOWN PROJECT TITLE</i>
+</div>
+<br/>
+<div>Описание задачи:</div>
+<div>
+    <div>Название: <i th:text="${taskTitle}">UNKNOWN TASK TITLE</i></div>
+    <div>
+        Описание:
+        <span th:text="${taskDescription}">UNKNOWN TASK DESCRIPTION</span>
+    </div>
+    <div th:if="${taskDeadline != null}">
+        Крайний срок выполнения:
+        <strong th:text="${taskDeadline}">UNKNOWN TASK DESCRIPTION</strong>
+    </div>
+</div>
+<br/>
+<div>
+    Задачу назначил
+    <span th:text="${authorLastName}">UNKNOWN LAST NAME</span>
+    <span th:text="${authorFirstName}">UNKNOWN FIRST NAME</span>
+    <span th:if="${authorPatronymic != null}" th:text="${authorPatronymic}">UNKNOWN PATRONYMIC</span>
+    <div th:if="${authorMail != null}">Котакты <strong th:text="${authorMail}">UNKNOWN PATRONYMIC</strong></div>
+</div>
+</body>
+</html>
